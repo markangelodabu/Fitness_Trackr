@@ -2,7 +2,7 @@
 const express = require('express');
 const server = express();
 const morgan = require('morgan');
-const { client } = require('./db/client');
+const client = require('./db/client');
 require('dotenv').config();
 const {PORT} = process.env;
 
