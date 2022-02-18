@@ -1,4 +1,4 @@
-const { client } = require("./client");
+const client = require("./client");
 const bcrypt = require("bcrypt");
 const SALT_ROUNDS = 10;
 
@@ -22,6 +22,7 @@ const createUser = async ({ username, password }) => {
         `,
       [username, hashPwd]
     );
+    delete user.password;
     console.log(user);
     return user;
   } catch (error) {
@@ -37,7 +38,7 @@ const getUser = async ({ username, password }) => {
         SELECT * FROM users
         WHERE username = $1;
       `,
-      [username, password]
+      [username]
     );
     console.log("Before return", user);
     if (!user) {
