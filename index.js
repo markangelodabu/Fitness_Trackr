@@ -1,13 +1,15 @@
 // create the express server here
-const express = require('express');
+require("dotenv").config();
+const express = require("express");
+const morgan = require("morgan");
 const server = express();
-const morgan = require('morgan');
-const client = require('./db/client');
-require('dotenv').config();
-const {PORT} = process.env;
+const client = require("./db/client");
+const { PORT } = process.env;
 
+server.use(morgan("dev"));
+server.use(express.json());
 
 server.listen(PORT, () => {
-    client.connect();
-    console.log(`Listening on http://localhost:${PORT}`);
-})
+  client.connect();
+  console.log(`Listening on http://localhost:${PORT}`);
+});
