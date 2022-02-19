@@ -26,9 +26,11 @@ const createActivity = async ({ name, description }) => {
   }
 };
 
-const updateActivity = async (id, fields = {}) => {
+const updateActivity = async ({ id, ...fields }) => {
   const setString = Object.keys(fields)
-    .map((key, index) => `"${key}"=$${index + 1}`)
+    .map((field, index) => {
+      return `"${field}" = $${index + 1}`;
+    })
     .join(", ");
   if (setString.length === 0) {
     return;
