@@ -18,7 +18,7 @@ const getActivityById = async (id) => {
 
     return activity;
   } catch (error) {
-    console.log("Error at getActivity By Id", error)
+    console.log("Error at getActivityById", error)
     throw error
   }
 };
