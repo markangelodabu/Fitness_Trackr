@@ -76,11 +76,16 @@ const getUserById = async (id) => {
 };
 const getUserByUsername = async (username) => {
   try {
-      const {rows: [user] } = await client.query(`
+    const {
+      rows: [user],
+    } = await client.query(
+      `
         SELECT * FROM users
         WHERE username = $1;
-      `, [username]);
-      return user;
+      `,
+      [username]
+    );
+    return user;
   } catch (error) {
     console.log("Error with getUserByUsername");
     throw error;

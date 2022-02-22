@@ -2,24 +2,28 @@ const client = require("./client");
 
 const getActivityById = async (id) => {
   try {
-    const {rows: [activity]} = await client.query(`
+    const {
+      rows: [activity],
+    } = await client.query(
+      `
       SELECT *
       FROM activities
       WHERE id=$1;
-    `,[id]
+    `,
+      [id]
     );
 
     if (!activity) {
       throw {
         name: "ActivityNotFoundError",
-        message: "Could not find activity with the given id"
+        message: "Could not find activity with the given id",
       };
     }
 
     return activity;
   } catch (error) {
-    console.log("Error at getActivityById", error)
-    throw error
+    console.log("Error at getActivityById", error);
+    throw error;
   }
 };
 
