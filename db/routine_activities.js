@@ -44,19 +44,24 @@ const addActivityToRoutine = async ({
   duration,
 }) => {
   try {
-      const { rows: [routine_activity]} = await client.query(`
+    const {
+      rows: [routine_activity],
+    } = await client.query(
+      `
         INSERT INTO routine_activities("routineId", "activityId", count, duration)
         VALUES ($1, $2, $3, $4)
         RETURNING *;
-      `, [routineId,activityId, count, duration]);
-      return routine_activity;
+      `,
+      [routineId, activityId, count, duration]
+    );
+    return routine_activity;
   } catch (error) {
     console.log("Error in addActivityToRoutine", error);
     throw error;
   }
 };
 const updateRoutineActivity = async ({ id, ...fields }) => {
-    const setString = Object.keys(fields)
+  const setString = Object.keys(fields)
     .map((field, index) => {
       return `"${field}" = $${index + 1}`;
     })
@@ -84,12 +89,17 @@ const updateRoutineActivity = async ({ id, ...fields }) => {
 };
 const destroyRoutineActivity = async (id) => {
   try {
-      const { rows: [routine_activity]} = await client.query(`
+    const {
+      rows: [routine_activity],
+    } = await client.query(
+      `
         DELETE FROM routine_activities
         WHERE id = $1
-        RETURING *;
-      `, [id]);
-      return routine_activity;
+        RETURNING *;
+      `,
+      [id]
+    );
+    return routine_activity;
   } catch (error) {
     console.log("Error in destroyRoutineActivity", error);
     throw error;
