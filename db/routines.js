@@ -102,7 +102,7 @@ const getAllRoutinesByUser = async ({ username }) => {
       `
             SELECT routines.*, users.username AS "creatorName" 
             FROM routines
-            JOIN users ON routines."creatorId" = user.id
+            JOIN users ON routines."creatorId" = users.id
             WHERE users.username = $1;
         `,
       [username]
@@ -133,9 +133,8 @@ const getPublicRoutinesByUser = async ({ username }) => {
       `
             SELECT routines.*, users.username AS "creatorName" 
             FROM routines
-            JOIN users ON routines."creatorId" = user.id
-            WHERE routines."isPublic" = true
-            WHERE user.username = $1;
+            JOIN users ON routines."creatorId" = users.id
+            WHERE users.username = $1;
         `,
       [username]
     );
@@ -151,6 +150,7 @@ const getPublicRoutinesByUser = async ({ username }) => {
         (activity) => routine.id === activity.routineId
       );
     });
+    routines.isPublic = true
 
     return routines;
   } catch (error) {
@@ -165,8 +165,8 @@ const getPublicRoutinesByActivity = async ({ id }) => {
       `
             SELECT * 
             FROM routines
-            WHERE id = $1
-            JOIN users ON routines."creatorId: = user.id
+            JOIN users ON routines."creatorId" = users.id
+            WHERE id = $1;
         `,
       [id]
     );
@@ -174,7 +174,7 @@ const getPublicRoutinesByActivity = async ({ id }) => {
     const { rows: activities } = await client.query(`
         SELECT activities.*, routine_activities.count, routine_activities.duration, routine_activities."routineId"
         FROM activities
-        JOIN routine_activites ON activities.id = routine_activities."activityId";
+        JOIN routine_activities ON activities.id = routine_activities."activityId";
         `);
 
     routines.forEach((routine) => {
@@ -182,7 +182,7 @@ const getPublicRoutinesByActivity = async ({ id }) => {
         (activity) => routine.id === activity.routineId
       );
     });
-
+    routines.isPublic = true;
     return routines;
   } catch (error) {
     console.log("Error at getPublicRoutinesByActivity", error);
