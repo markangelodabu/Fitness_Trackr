@@ -108,39 +108,16 @@ const destroyRoutineActivity = async (id) => {
 const getRoutineActivitiesByRoutine = async ({ id }) => {
   try {
     const {
-      rows: [routine],
+      rows: routine_activities,
     } = await client.query(
       `
               SELECT *
-              FROM routines
-              WHERE id = $1;
+              FROM routine_activities
+              WHERE "routineId" = $1;
           `,
       [id]
     );
-    const { rows: activities } = await client.query(
-      `
-              SELECT activities.*
-              FROM activities
-              JOIN routine_activities ON activities.id=routine_activities."routineActivityId"
-              WHERE routine_activities."routineId"=$1
-          `,
-      [id]
-    );
-    const {
-      rows: [creator],
-    } = await client.query(
-      `
-          SELECT id, username
-          FROM users
-          WHERE id=$1;
-      `,
-      [routine.creatorId]
-    );
-
-    routine.activities = activities;
-    routine.creator = creator;
-
-    delete routine.creatorId;
+    return routine_activities
   } catch (error) {
     console.log("Error in getRoutineActivitiesByRoutine", error);
     throw error;
