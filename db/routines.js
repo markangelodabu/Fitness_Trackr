@@ -1,4 +1,5 @@
 const client = require("./client");
+const util = require("util")
 
 const getRoutineById = async (id) => {
   try {
@@ -40,6 +41,34 @@ const getRoutinesWithoutActivities = async () => {
   }
 };
 
+//helper function
+const addActivitiesToRoutines = async (routines) => {
+    try {
+        const routineIdArray = routines.map((routine) => {
+            return routine.id
+        })
+    
+        // routineActivityId created for the frontend part of the project
+        const { rows: activities } = await client.query(`
+                SELECT activities.*, routine_activities.count, routine_activities.duration, routine_activities."routineId", routine_activities.id AS "routineActivityId"
+                FROM activities
+                JOIN routine_activities 
+                ON activities.id = routine_activities."activityId"
+                WHERE routine_activities."routineId" IN (${routineIdArray});
+            `)
+    
+        routines.forEach((routine) => {
+            routine.activities = activities.filter((activity) => {
+                return activity.routineId === routine.id 
+            })
+        })
+
+        return routines;
+    }   catch (error) {
+        throw error;
+    }
+}
+
 const getAllRoutines = async () => {
   try {
     const { rows: routines } = await client.query(`
@@ -48,20 +77,8 @@ const getAllRoutines = async () => {
             JOIN users ON routines."creatorId" = users.id; 
         `);
 
-    const { rows: activities } = await client.query(`
-            SELECT activities.*, routine_activities.count, routine_activities.duration, routine_activities."routineId"
-            FROM activities
-            JOIN routine_activities ON activities.id = routine_activities."activityId";
-        `);
-
-    routines.forEach((routine) => {
-      routine.activities = activities.filter(
-        (activity) => routine.id === activity.routineId
-      );
-    });
-    console.log(activities);
-    console.log(routines);
-    return routines;
+    console.log("routines", util.inspect(routines, true, 5, true))
+    return await addActivitiesToRoutines(routines);
   } catch (error) {
     console.log("Error at getAllRoutes", error);
     throw error;
@@ -73,23 +90,12 @@ const getAllPublicRoutines = async () => {
     const { rows: routines } = await client.query(`
             SELECT routines.*, users.username AS "creatorName"
             FROM routines
-            JOIN users ON routines."creatorId" = users.id
+            JOIN users 
+            ON routines."creatorId" = users.id
             WHERE routines."isPublic" = true;
         `);
 
-    const { rows: activities } = await client.query(`
-            SELECT activities.*, routine_activities.count, routine_activities.duration, routine_activities."routineId"
-            FROM activities
-            JOIN routine_activities ON activities.id = routine_activities."activityId";
-        `);
-
-    routines.forEach((routine) => {
-      routine.activities = activities.filter(
-        (activity) => routine.id === activity.routineId
-      );
-    });
-
-    return routines;
+    return await addActivitiesToRoutines(routines);
   } catch (error) {
     console.log("Error at getAllPublicRoutines", error);
     throw error;
@@ -108,19 +114,7 @@ const getAllRoutinesByUser = async ({ username }) => {
       [username]
     );
 
-    const { rows: activities } = await client.query(`
-        SELECT activities.*, routine_activities.count, routine_activities.duration, routine_activities."routineId"
-        FROM activities
-        JOIN routine_activities ON activities.id = routine_activities."activityId";
-        `);
-
-    routines.forEach((routine) => {
-      routine.activities = activities.filter(
-        (activity) => routine.id === activity.routineId
-      );
-    });
-
-    return routines;
+    return await addActivitiesToRoutines(routines);
   } catch (error) {
     console.log("Error at getAllRoutinesByUser", error);
     throw error;
@@ -139,51 +133,31 @@ const getPublicRoutinesByUser = async ({ username }) => {
       [username]
     );
 
-    const { rows: activities } = await client.query(`
-        SELECT activities.*, routine_activities.count, routine_activities.duration, routine_activities."routineId"
-        FROM activities
-        JOIN routine_activities ON activities.id = routine_activities."activityId";
-        `);
-
-    routines.forEach((routine) => {
-      routine.activities = activities.filter(
-        (activity) => routine.id === activity.routineId
-      );
-    });
     routines.isPublic = true
 
-    return routines;
+    return await addActivitiesToRoutines(routines);
   } catch (error) {
     console.log("Error at getPublicRoutinesByUser", error);
     throw error;
   }
 };
 
-const getPublicRoutinesByActivity = async ({ id }) => {
+const getPublicRoutinesByActivity = async ({id: activityId} ) => {
   try {
     const { rows: routines } = await client.query(
       `
-            SELECT * 
+            SELECT routines.*, users.username AS "creatorName" 
             FROM routines
-            JOIN users ON routines."creatorId" = users.id
-            WHERE id = $1;
-        `,
-      [id]
+            JOIN users 
+            ON routines."creatorId" = users.id
+            JOIN routine_activities
+            ON routines.id = routine_activities."routineId"
+            WHERE "isPublic" = true
+            AND routine_activities."activityId" = $1;
+            
+        `, [activityId],
     );
-
-    const { rows: activities } = await client.query(`
-        SELECT activities.*, routine_activities.count, routine_activities.duration, routine_activities."routineId"
-        FROM activities
-        JOIN routine_activities ON activities.id = routine_activities."activityId";
-        `);
-
-    routines.forEach((routine) => {
-      routine.activities = activities.filter(
-        (activity) => routine.id === activity.routineId
-      );
-    });
-    routines.isPublic = true;
-    return routines;
+    return await addActivitiesToRoutines(routines);
   } catch (error) {
     console.log("Error at getPublicRoutinesByActivity", error);
     throw error;
@@ -250,6 +224,12 @@ const destroyRoutine = async (id) => {
       [id]
     );
 
+    await client.query(`
+        DELETE FROM routine_activities
+        WHERE "routineId" = $1
+        RETURNING *;
+    `, [id])
+    
     return routine;
   } catch (error) {
     console.log("Error at destroyRoutine", error);
