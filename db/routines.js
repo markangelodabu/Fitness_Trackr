@@ -1,5 +1,5 @@
 const client = require("./client");
-const util = require("util")
+const util = require("util");
 
 const getRoutineById = async (id) => {
   try {
@@ -43,31 +43,31 @@ const getRoutinesWithoutActivities = async () => {
 
 //helper function
 const addActivitiesToRoutines = async (routines) => {
-    try {
-        const routineIdArray = routines.map((routine) => {
-            return routine.id
-        })
-    
-        // routineActivityId created for the frontend part of the project
-        const { rows: activities } = await client.query(`
+  try {
+    const routineIdArray = routines.map((routine) => {
+      return routine.id;
+    });
+
+    // routineActivityId created for the frontend part of the project
+    const { rows: activities } = await client.query(`
                 SELECT activities.*, routine_activities.count, routine_activities.duration, routine_activities."routineId", routine_activities.id AS "routineActivityId"
                 FROM activities
                 JOIN routine_activities 
                 ON activities.id = routine_activities."activityId"
                 WHERE routine_activities."routineId" IN (${routineIdArray});
-            `)
-    
-        routines.forEach((routine) => {
-            routine.activities = activities.filter((activity) => {
-                return activity.routineId === routine.id 
-            })
-        })
+            `);
 
-        return routines;
-    }   catch (error) {
-        throw error;
-    }
-}
+    routines.forEach((routine) => {
+      routine.activities = activities.filter((activity) => {
+        return activity.routineId === routine.id;
+      });
+    });
+
+    return routines;
+  } catch (error) {
+    throw error;
+  }
+};
 
 const getAllRoutines = async () => {
   try {
@@ -77,7 +77,7 @@ const getAllRoutines = async () => {
             JOIN users ON routines."creatorId" = users.id; 
         `);
 
-    console.log("routines", util.inspect(routines, true, 5, true))
+    console.log("routines", util.inspect(routines, true, 5, true));
     return await addActivitiesToRoutines(routines);
   } catch (error) {
     console.log("Error at getAllRoutes", error);
@@ -133,7 +133,7 @@ const getPublicRoutinesByUser = async ({ username }) => {
       [username]
     );
 
-    routines.isPublic = true
+    routines.isPublic = true;
 
     return await addActivitiesToRoutines(routines);
   } catch (error) {
@@ -142,7 +142,7 @@ const getPublicRoutinesByUser = async ({ username }) => {
   }
 };
 
-const getPublicRoutinesByActivity = async ({id: activityId} ) => {
+const getPublicRoutinesByActivity = async ({ id: activityId }) => {
   try {
     const { rows: routines } = await client.query(
       `
@@ -155,7 +155,8 @@ const getPublicRoutinesByActivity = async ({id: activityId} ) => {
             WHERE "isPublic" = true
             AND routine_activities."activityId" = $1;
             
-        `, [activityId],
+        `,
+      [activityId]
     );
     return await addActivitiesToRoutines(routines);
   } catch (error) {
@@ -224,12 +225,15 @@ const destroyRoutine = async (id) => {
       [id]
     );
 
-    await client.query(`
+    await client.query(
+      `
         DELETE FROM routine_activities
         WHERE "routineId" = $1
         RETURNING *;
-    `, [id])
-    
+    `,
+      [id]
+    );
+
     return routine;
   } catch (error) {
     console.log("Error at destroyRoutine", error);

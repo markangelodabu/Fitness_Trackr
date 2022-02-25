@@ -1,22 +1,4 @@
 const client = require("./client");
-const {
-  getActivityById,
-  getAllActivities,
-  createActivity,
-  updateActivity,
-} = require("./activities");
-const {
-  getRoutineById,
-  getRoutinesWithoutActivities,
-  getAllRoutines,
-  getAllPublicRoutines,
-  getAllRoutinesByUser,
-  getPublicRoutinesByUser,
-  getPublicRoutinesByActivity,
-  createRoutine,
-  updateRoutine,
-  destroyRoutine,
-} = require("./routines");
 
 const getRoutineActivityById = async (id) => {
   try {
@@ -107,9 +89,7 @@ const destroyRoutineActivity = async (id) => {
 };
 const getRoutineActivitiesByRoutine = async ({ id }) => {
   try {
-    const {
-      rows: routine_activities,
-    } = await client.query(
+    const { rows: routine_activities } = await client.query(
       `
               SELECT *
               FROM routine_activities
@@ -117,7 +97,7 @@ const getRoutineActivitiesByRoutine = async ({ id }) => {
           `,
       [id]
     );
-    return routine_activities
+    return routine_activities;
   } catch (error) {
     console.log("Error in getRoutineActivitiesByRoutine", error);
     throw error;
