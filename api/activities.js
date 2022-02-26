@@ -9,6 +9,7 @@ const {
   createActivity,
   updateActivity,
 } = require("../db");
+const { requireUser } = require("./utils");
 
 activitiesRouter.use((req, res, next) => {
   console.log("A request is being made to /activities");
@@ -24,35 +25,15 @@ activitiesRouter.get("/", async (req, res, next) => {
     next(error);
   }
 });
-
-activitiesRouter.post("/createActivity", async (req, res, next) => {
-  const { id, name, description } = req.body;
+activitiesRouter.post("/", requireUser, async (req, res, next) => {
+  const { name, description } = req.body;
   try {
-    const existingActivity = await getActivityById(id);
-    if (existingActivity) {
-      next({
-        name: "ActivityExistsError",
-        message: "This activity already exists",
-      });
-    }
-    const newActivity = await createActivity(name, description);
+    const newActivity = await createActivity({ name, description });
 
-    const token = jwt.sign(
-      {
-        id: newActivity.id,
-        name,
-        description,
-      },
-      process.env.JWT_SECRET
-    );
-
-    res.send({
-      token,
-    });
-    return newActivity;
-  } catch ({ name, message }) {
-    console.log({ name, message });
-    next({ name, message });
+    res.send(newActivity);
+  } catch (error) {
+    console.log('Error creating new activity', error);
+    throw error;
   }
 });
 
