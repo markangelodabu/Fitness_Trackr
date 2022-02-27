@@ -87,25 +87,22 @@ usersRouter.post("/login", async(req, res, next) => {
 }); 
 
 usersRouter.get("/me", requireUser, async (req, res, next) => {
-  console.log("headers", req.headers);
-  const token = req.headers.authorization
-  console.log("token", token)
-  if (token) {
-    res.send()
-  }
+    res.send(
+      req.user
+    )
 })
 
-// usersRouter.get("/:username/routines", async (req, res, next) => {
-//   const {username} = req.params;
-
-//   try {
-//     const routinesByUsername = getPublicRoutinesByUser(username);
-//     res.send({
-//       routines: routinesByUsername
-//     })
-//   } catch (error) {
-//     next(error)
-//   }
-// })
+usersRouter.get("/:username/routines", async (req, res, next) => {
+  const {username} = req.params;
+  const user = await getUserByUsername (username)
+  try {
+    const routinesByUsername = await getPublicRoutinesByUser(user);
+    res.send(
+      routinesByUsername
+    )
+  } catch (error) {
+    next(error)
+  }
+})
 
 module.exports = usersRouter;
