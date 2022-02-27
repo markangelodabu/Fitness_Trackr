@@ -25,6 +25,7 @@ activitiesRouter.get("/", async (req, res, next) => {
     next(error);
   }
 });
+
 activitiesRouter.post("/", requireUser, async (req, res, next) => {
   const { name, description } = req.body;
   try {
@@ -32,9 +33,28 @@ activitiesRouter.post("/", requireUser, async (req, res, next) => {
 
     res.send(newActivity);
   } catch (error) {
-    console.log('Error creating new activity', error);
-    throw error;
+    console.log("Error creating new activity", error);
+    next(error);
   }
 });
+
+activitiesRouter.patch("/:activityId", requireUser, async (req, res, next) => {
+    const { activityId } = req.params;
+    const { name, description } = req.body;
+    try {
+      const aId = await getActivityById(
+        activityId
+      );
+      const updatedActivity = await updateActivity({
+        id: aId.id,
+        name,
+        description,
+      });
+      res.send(updatedActivity);
+    } catch (error) {
+      console.log("Error updating an activity", error);
+      next(error);
+    }
+  });
 
 module.exports = activitiesRouter;
