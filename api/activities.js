@@ -38,17 +38,15 @@ activitiesRouter.post("/", requireUser, async (req, res, next) => {
   }
 });
 
-activitiesRouter.patch("/:activityId"),
-  requireUser,
-  async (req, res, next) => {
+activitiesRouter.patch("/:activityId", requireUser, async (req, res, next) => {
     const { activityId } = req.params;
     const { name, description } = req.body;
     try {
-        const aId = await getActivityById({
-            activityId
-        })
+      const aId = await getActivityById(
+        activityId
+      );
       const updatedActivity = await updateActivity({
-        id: activityId,
+        id: aId.id,
         name,
         description,
       });
@@ -57,6 +55,6 @@ activitiesRouter.patch("/:activityId"),
       console.log("Error updating an activity", error);
       next(error);
     }
-  };
+  });
 
 module.exports = activitiesRouter;
