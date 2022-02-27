@@ -24,6 +24,7 @@ usersRouter.post("/register", async(req, res, next) => {
       name: "MissingCredentialsError",
       message: "Please supply both username and password"
     })
+    return;
   }
 
   if (password.length < 8) {
@@ -31,6 +32,7 @@ usersRouter.post("/register", async(req, res, next) => {
       name: "PasswordTooShort",
       message: "Please create a password that has 8 characters or more"
     })
+    return;
   }
 
   try {
@@ -41,6 +43,7 @@ usersRouter.post("/register", async(req, res, next) => {
         name: 'UserExistsError',
         message: 'A user by that username already exists'
       });
+      return;
     }
 
     const user = await createUser({username, password});
