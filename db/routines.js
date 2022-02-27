@@ -128,12 +128,11 @@ const getPublicRoutinesByUser = async ({ username }) => {
             SELECT routines.*, users.username AS "creatorName" 
             FROM routines
             JOIN users ON routines."creatorId" = users.id
-            WHERE users.username = $1;
+            WHERE users.username = $1 
+            AND routines."isPublic" = true
         `,
       [username]
     );
-
-    routines.isPublic = true;
 
     return await addActivitiesToRoutines(routines);
   } catch (error) {
