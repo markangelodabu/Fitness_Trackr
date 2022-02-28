@@ -82,6 +82,7 @@ usersRouter.post("/login", async (req, res, next) => {
 
     if (user && isMatch) {
       const token = jwt.sign(user, JWT_SECRET);
+      console.log("This is the token", token)
       res.send({ token, message: "You're logged in!" });
     } else {
       next({
