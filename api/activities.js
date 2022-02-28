@@ -1,7 +1,6 @@
 const express = require("express");
 const activitiesRouter = express.Router();
-const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = process.env;
+const { requireUser } = require("./utils");
 
 const {
   getActivityById,
@@ -10,7 +9,6 @@ const {
   updateActivity,
   getPublicRoutinesByActivity,
 } = require("../db");
-const { requireUser } = require("./utils");
 
 activitiesRouter.use((req, res, next) => {
   console.log("A request is being made to /activities");

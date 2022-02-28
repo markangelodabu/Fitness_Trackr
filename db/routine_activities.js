@@ -7,7 +7,7 @@ const getRoutineActivityById = async (id) => {
     } = await client.query(
       `
         SELECT *
-        FROM routines_activities
+        FROM routine_activities
         WHERE id=$1
       `,
       [id]
@@ -38,7 +38,6 @@ const addActivityToRoutine = async ({
     );
     return routine_activity;
   } catch (error) {
-    console.log("Error in addActivityToRoutine", error);
     throw error;
   }
 };
