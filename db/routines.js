@@ -13,14 +13,7 @@ const getRoutineById = async (id) => {
         `,
       [id]
     );
-
-    if (!routine) {
-      throw {
-        name: "RoutineNotFoundError",
-        message: "Routine is not found with the given id",
-      };
-    }
-
+    
     return routine;
   } catch (error) {
     console.log("Error at getRoutineById", error);
